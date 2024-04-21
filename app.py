@@ -5,7 +5,99 @@ import os
 import pandas as pd
 import numpy as np
 from mlxtend.preprocessing import TransactionEncoder
-from mlxtend.frequent_patterns import apriori
+from mlxtend.frequent_patterns import apriori, association_rules
+ 
+
+#deprecated
+
+# import csv
+# import random
+
+# # Nagłówki kolumn
+# headers = ["Transaction ID", "Nuts", "Shellfish", "Canned Fruit", "Spices", "Pasta", "Yogurt", "Coffee",
+#            "Deli Meats", "Ice Cream", "TV Dinner", "Cheese", "Chips", "Sour Cream", "Cottage Cheese",
+#            "Deli Salads", "Dried Meat", "Paper Wipes", "Soda", "Deodorizers", "Cleaners", "Shower Soap",
+#            "Fresh Fish", "Bagels", "Muffins", "Sliced Bread", "Pancake Mix", "Pancakes", "Juice", "Jelly",
+#            "Jam", "Preserves", "Waffles", "Cereal", "Chocolate Candy", "Gum", "Hard Candy", "Personal Hygiene",
+#            "Pots and Pans", "Tools", "Sponges", "Beer", "Wine", "Cookies", "Pretzels", "Candles", "Sauces",
+#            "Cooking Oil", "Sugar", "Chocolate", "Flavored Drinks", "Peanut Butter", "Popcorn", "Paper Dishes",
+#            "Plastic Utensils", "Rice", "Soup", "Dehydrated Soup", "Frozen Vegetables", "Fresh Vegetables",
+#            "Canned Vegetables", "French Fries", "Pizza", "Hamburger", "Eggs", "Tofu", "Dish Soap",
+#            "Dishwasher Soap", "Aspirin", "Ibuprofen", "Acetominifen", "Nasal Sprays", "Mouthwash",
+#            "Cold Remedies", "Milk", "Fresh Chicken", "Conditioner", "Shampoo", "Lightbulbs", "Hot Dogs",
+#            "Crackers", "Dips", "Donuts", "Toilet Brushes", "Pot Scrubbers", "Pot Cleaners", "Toothbrushes",
+#            "Sunglasses", "Bologna", "Non-Alcoholic Wine", "Tuna", "Shrimp", "Anchovies", "Clams", "Oysters",
+#            "Sardines", "Fresh Fruit", "Frozen Chicken", "Batteries", "Maps", "Screwdrivers", "Sports Magazines",
+#            "Home Magazines", "Fashion Magazines", "Computer Magazines", "Auto Magazines", "Dried Fruit",
+#            "Popsicles"]
+
+# # Liczba transakcji
+# num_transactions = 5
+
+# # Procentowe udziały wartości
+# value_distribution = {0: 0.6, 1:0.4}
+
+# # Generowanie danych
+# data = []
+# for i in range(1, num_transactions + 1):
+#     row = [i] + [random.choices(list(value_distribution.keys()), weights=list(value_distribution.values()))[0] for _ in range(len(headers) - 1)]
+#     data.append(row)
+
+# # Zapis do pliku CSV
+# with open('foodmart.csv', 'w', newline='') as file:
+#     writer = csv.writer(file)
+#     writer.writerow(headers)
+#     writer.writerows(data)
+
+# print("Plik foodmart.csv został wygenerowany pomyślnie.")
+
+
+#good
+
+# import csv
+# import random
+
+# # Lista produktów
+# products = [
+#     "Nuts", "Shellfish", "Canned Fruit", "Spices", "Pasta", "Yogurt", "Coffee", "Deli Meats", "Ice Cream", 
+#     "TV Dinner", "Cheese", "Chips", "Sour Cream", "Cottage Cheese", "Deli Salads", "Dried Meat", "Paper Wipes", 
+#     "Soda", "Deodorizers", "Cleaners", "Shower Soap", "Fresh Fish", "Bagels", "Muffins", "Sliced Bread", 
+#     "Pancake Mix", "Pancakes", "Juice", "Jelly", "Jam", "Preserves", "Waffles", "Cereal", "Chocolate Candy", 
+#     "Gum", "Hard Candy", "Personal Hygiene", "Pots and Pans", "Tools", "Sponges", "Beer", "Wine", "Cookies", 
+#     "Pretzels", "Candles", "Sauces", "Cooking Oil", "Sugar", "Chocolate", "Flavored Drinks", "Peanut Butter", 
+#     "Popcorn", "Paper Dishes", "Plastic Utensils", "Rice", "Soup", "Dehydrated Soup", "Frozen Vegetables", 
+#     "Fresh Vegetables", "Canned Vegetables", "French Fries", "Pizza", "Hamburger", "Eggs", "Tofu", "Dish Soap", 
+#     "Dishwasher Soap", "Aspirin", "Ibuprofen", "Acetominifen", "Nasal Sprays", "Mouthwash", "Cold Remedies", 
+#     "Milk", "Fresh Chicken", "Conditioner", "Shampoo", "Lightbulbs", "Hot Dogs", "Crackers", "Dips", "Donuts", 
+#     "Toilet Brushes", "Pot Scrubbers", "Pot Cleaners", "Toothbrushes", "Sunglasses", "Bologna", 
+#     "Non-Alcoholic Wine", "Tuna", "Shrimp", "Anchovies", "Clams", "Oysters", "Sardines", "Fresh Fruit", 
+#     "Frozen Chicken", "Batteries", "Maps", "Screwdrivers", "Sports Magazines", "Home Magazines", 
+#     "Fashion Magazines", "Computer Magazines", "Auto Magazines", "Dried Fruit", "Popsicles"
+# ]
+
+# # Generowanie transakcji
+# transactions = []
+# for _ in range(700):
+#     # Losowa liczba produktów w transakcji (od 1 do 10)
+#     num_products = random.randint(1, 10)
+#     # Losowy wybór produktów
+#     transaction = random.sample(products, num_products)
+#     transactions.append(transaction)
+
+# # Zapis do pliku CSV
+# with open('foodmart.csv', 'w', newline='') as file:
+#     writer = csv.writer(file)
+#     # Nagłówki kolumn
+#     writer.writerow(["ID"] + ["Product_" + str(i+1) for i in range(10)])
+#     # Zapis danych
+#     for i, transaction in enumerate(transactions):
+#         # Dopasowanie liczby produktów w transakcji do rzeczywistej liczby wylosowanych produktów
+#         row = [i+1] + transaction + [''] * (10 - len(transaction))
+#         writer.writerow(row)
+
+# print("Plik CSV został wygenerowany pomyślnie!")
+
+    
     
 #UI functions
 def custom_value_transform(value):
@@ -128,10 +220,6 @@ app_ui = ui.page_sidebar(
     ui.sidebar(sidebar_text(), width=320),  
     theme.darkly(),
     ui.download_button("downloadData", "Download foodmart.csv", class_="btn-primary"), ui.br(),
-    # ui.input_file("file1", "Choose CSV File", accept=[".csv"], multiple=False),
-    
-
-    
     ui.output_table("summary"),
     ui.output_text("find_frequent_itemsets"),
     title="Association Rule Induction",
@@ -139,9 +227,7 @@ app_ui = ui.page_sidebar(
 )
 
 
-
 #SERVER
-
 def server(input: Inputs, output: Outputs, session: Session):
     @render.download()
     def downloadData():
@@ -178,7 +264,7 @@ def server(input: Inputs, output: Outputs, session: Session):
         if df.empty:
             return pd.DataFrame()
         return df
-          
+        
     @reactive.effect
     @reactive.event(input.checkbox_samplefile)
     def _():
@@ -209,6 +295,23 @@ def server(input: Inputs, output: Outputs, session: Session):
             )
         else:
             ui.remove_ui("#inserted_df")        
+
+    def find_fr_itemsets():
+        pf = parsed_file()
+        if pf.empty:
+            return pd.DataFrame()
+        if 'ID' in pf.columns:
+            pf.drop(columns=['ID'], inplace=True)
+        dataset = pf.values.tolist()
+        dataset = [[item for item in row if isinstance(item, str)] for row in dataset]
+        te = TransactionEncoder()
+        te_ary = te.fit(dataset).transform(dataset)
+        df = pd.DataFrame(te_ary, columns=te.columns_)
+        return apriori(df, min_support=0.0001, use_colnames=True)
+
+    @render.data_frame
+    def show_fr_itemsets():
+        return pd.DataFrame(find_fr_itemsets())
     
     @reactive.effect
     @reactive.event(input.checkbox_fi)
@@ -218,82 +321,35 @@ def server(input: Inputs, output: Outputs, session: Session):
                 ui.div(
                     {"id": "inserted_df_fi"},
                     ui.h2(f"Frequent Itemsets in {get_file_name()}"),
-                    ui.output_data_frame("data_table"),
+                    ui.output_data_frame("show_fr_itemsets"),
                 ),
                 selector="#main_view",
                 where="beforeEnd",
             )
         else:
             ui.remove_ui("#inserted_df_fi")    
-    
-    @render.text    
-    def find_frequent_itemsets():
-        df = pd.read_csv('foodmart.csv')
-        df = df.drop(columns=['Transaction ID'])
-        transactions = df.values.tolist()
-        te = TransactionEncoder()
-        te_ary = te.fit(transactions).transform(transactions)
-        encoded_df = pd.DataFrame(te_ary, columns=te.columns_)
-        frequent_itemsets = apriori(encoded_df, min_support=0.01, use_colnames=True)
-        return frequent_itemsets
+       
+    @render.data_frame
+    def show_assoc_rules():
+        freq_itemsets = find_fr_itemsets()
+        return pd.DataFrame(association_rules(freq_itemsets, metric="confidence", min_threshold=0.7))
+
+    @reactive.effect
+    @reactive.event(input.checkbox_ar)
+    def _():
+        if input.checkbox_ar():
+            ui.insert_ui(
+                ui.div(
+                    {"id": "inserted_df_ar"},
+                    ui.h2(f"Association Rules in {get_file_name()}"),
+                    ui.output_data_frame("show_assoc_rules"),
+                ),
+                selector="#main_view",
+                where="beforeEnd",
+            )
+        else:
+            ui.remove_ui("#inserted_df_ar")           
         
-    # @render.text
-    # def show_file_selector():
-    #     if input.checkbox_samplefile():
-    #         return True
-    #     else:
-    #         return False
-        
 
-        
-    
-        
-    # @render.table
-    # def summary():
-    #     df = parsed_file()
-
-    #     if df.empty:
-    #         return pd.DataFrame()
-
-    #     # Get the row count, column count, and column names of the DataFrame
-    #     row_count = df.shape[0]
-    #     column_count = df.shape[1]
-    #     names = df.columns.tolist()
-    #     column_names = ", ".join(str(name) for name in names)
-
-    #     # Create a new DataFrame to display the information
-    #     info_df = pd.DataFrame(
-    #         {
-    #             "Show oryginal file":[row_count],
-    #             "Show file with columns as values": [column_count],
-    #             "Show frequent items": [column_names],
-    #         }
-    #     )
-    #     # input.stats() is a list of strings; subset the columns based on the selected
-    #     # checkboxes
-    #     return info_df.loc[:, input.stats()]
-    
-
-    
-    # @render.text()
-    # @reactive.event(input.confirm_button_s)
-    # def confirm_button_s_onclick():
-    #     return f"{input.confirm_button_s()}"
-    
-
-    
-    # @render.text()
-    # @reactive.event(input.expand_all_button)
-    # def expand_button_onclick():
-    #     return f"{input.expand_all_button()}"
-    
-    # @render.text()
-    # @reactive.event(input.collapse_all_button)
-    # def collapse_button_onclick():
-    #     return f"{input.collapse_all_button()}"
-    
-
-    
-    #@render.text
     
 app = App(app_ui, server)
