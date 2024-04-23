@@ -28,37 +28,32 @@ def make_panels():
         ui.accordion_panel(
             f"Start",
             ui.card( 
+                ui.card_header("Initial info"),
+                ui.input_checkbox("checkbox_initial_info", "Display initial information from the author", True),
+                id="card_start_initinfo",
+                full_screen=True,
+            ),
+            ui.card( 
                 ui.card_header("Choose file"),
                 ui.input_checkbox("checkbox_samplefile", "Use sample file", True),
-                # ui.input_file("file1", "Upload CSV File", accept=[".csv"], multiple=False),
-                # # ui.input_action_button("confirm_file_button_s", "Confirm your file"),
-                # ui.div({"style": "text-align: center;"}, "or"),
                 id="card_start_cf",
                 full_screen=True,
             ),
-                ui.card( 
-                ui.card_header("Display option"),
-                ui.input_checkbox("checkbox_of", "Show original file", False),
-                ui.input_checkbox("checkbox_fi", "Show frequent itemsets", False),
-                ui.input_checkbox("checkbox_ar", "Show association rules", False),
-                id="card_start_do",
-                full_screen=True,
-            )
         ),        
                 
         ui.accordion_panel(
             f"Frequent Itemsets",
-            ui.card(
-                ui.card_header("Info"),
-                ui.p(
-                    f"Number of itemstes: {number_of_itemsets}", ui.br(),
-                    f"Selected itemstes: {selected_i}", ui.br(), 
-                    f"Selected examples: {selected_e}", ui.br(),
-                ),
-                ui.input_action_button("expand_all_button1_fi", "Expand all"),  
-                ui.input_action_button("collapse_all_button1_fi", "Collapse all"),
-                full_screen=True,
-            ),
+            # ui.card(
+            #     ui.card_header("Info"),
+            #     ui.p(
+            #         f"Number of itemstes: {number_of_itemsets}", ui.br(),
+            #         f"Selected itemstes: {selected_i}", ui.br(), 
+            #         f"Selected examples: {selected_e}", ui.br(),
+            #     ),
+            #     #ui.input_action_button("expand_all_button1_fi", "Expand all"),  
+            #     #ui.input_action_button("collapse_all_button1_fi", "Collapse all"),
+            #     full_screen=True,
+            # ),
                         
             ui.card(
                 ui.card_header("Find itemsets"),
@@ -127,8 +122,7 @@ def sidebar_text():
 app_ui = ui.page_sidebar(
     ui.sidebar(sidebar_text(), width=320),  
     theme.darkly(),
-    ui.download_button("downloadData", "Download foodmart.csv", class_="btn-primary"), ui.br(),
-    ui.output_table("summary"),
+    ui.output_text("get_file_size"),
     ui.output_text("find_frequent_itemsets"),
     title="Association Rule Induction",
     id = "main_view",
@@ -165,6 +159,15 @@ def server(input: Inputs, output: Outputs, session: Session):
                 return "Your file is empty"
             else:
                 return file[0]["name"]
+            
+    @reactive.calc
+    def get_file_size():
+        file_name = get_file_name()
+        if get_file_name()=="Your file is empty":
+            file_size = 0
+        else:
+            file_size = os.path.getsize(file_name)
+        return(file_size)
         
     @render.data_frame
     def data_table():
@@ -176,6 +179,9 @@ def server(input: Inputs, output: Outputs, session: Session):
     @reactive.effect
     @reactive.event(input.checkbox_samplefile)
     def _():
+        ui.remove_ui("#inserted_of")
+        ui.remove_ui("#inserted_fi")  
+        ui.remove_ui("#inserted_ar")   
         if not input.checkbox_samplefile():
             ui.insert_ui(
                 ui.div(
@@ -191,18 +197,23 @@ def server(input: Inputs, output: Outputs, session: Session):
     @reactive.effect
     @reactive.event(input.checkbox_of)
     def _():
+        ui.remove_ui("#inserted_of")
         if input.checkbox_of():
             ui.insert_ui(
                 ui.div(
-                    {"id": "inserted_df"},
-                    ui.h2(get_file_name()),
-                    ui.output_data_frame("data_table"),
+                    {"id": "inserted_of"},
+                    ui.card(
+                        ui.h2(get_file_name()),
+                        ui.output_data_frame("data_table"),
+                        id="card_of",
+                        full_screen=True,
+                    )
                 ),
                 selector="#main_view",
                 where="beforeEnd",
             )
-        else:
-            ui.remove_ui("#inserted_df")        
+            ui.update_checkbox("checkbox_fi", value=False)
+            ui.update_checkbox("checkbox_ar", value=False)
 
     def find_fr_itemsets():
         pf = parsed_file()
@@ -224,18 +235,25 @@ def server(input: Inputs, output: Outputs, session: Session):
     @reactive.effect
     @reactive.event(input.checkbox_fi)
     def _():
+        ui.remove_ui("#inserted_of")
+        ui.remove_ui("#inserted_fi")  
+        ui.remove_ui("#inserted_ar")    
         if input.checkbox_fi():
             ui.insert_ui(
                 ui.div(
-                    {"id": "inserted_df_fi"},
-                    ui.h2(f"Frequent Itemsets in {get_file_name()}"),
-                    ui.output_data_frame("show_fr_itemsets"),
+                    {"id": "inserted_fi"},
+                    ui.card(
+                        ui.h2(f"Frequent Itemsets in {get_file_name()}"),
+                        ui.output_data_frame("show_fr_itemsets"),
+                        id="card_of",
+                        full_screen=True,
+                    ),
                 ),
                 selector="#main_view",
                 where="beforeEnd",
             )
-        else:
-            ui.remove_ui("#inserted_df_fi")    
+            ui.update_checkbox("checkbox_of", value=False)
+            ui.update_checkbox("checkbox_ar", value=False)
        
     @render.data_frame
     def show_assoc_rules():
@@ -245,19 +263,116 @@ def server(input: Inputs, output: Outputs, session: Session):
     @reactive.effect
     @reactive.event(input.checkbox_ar)
     def _():
+        ui.remove_ui("#inserted_of")
+        ui.remove_ui("#inserted_fi")  
+        ui.remove_ui("#inserted_ar")  
         if input.checkbox_ar():
             ui.insert_ui(
                 ui.div(
-                    {"id": "inserted_df_ar"},
-                    ui.h2(f"Association Rules in {get_file_name()}"),
-                    ui.output_data_frame("show_assoc_rules"),
+                    {"id": "inserted_ar"},
+                    ui.card(
+                        ui.h2(f"Association Rules in {get_file_name()}"),
+                        ui.output_data_frame("show_assoc_rules"),
+                        id="card_of",
+                        full_screen=True,
+                    ),
                 ),
                 selector="#main_view",
                 where="beforeEnd",
+            )  
+            ui.update_checkbox("checkbox_fi", value=False)
+            ui.update_checkbox("checkbox_of", value=False)      
+    
+    @render.text
+    def show_info_ar():
+        txt=f"File is too large. Displaying association rules is available for files up to 7KB."
+        return txt
+        
+    @render.text
+    def show_info_fi():
+        txt=f"File is too large. Displaying frequent itemsets is available for files up to 47KB."
+        return txt
+                  
+    @reactive.effect
+    def _():
+        ui.remove_ui("#inserted_card")
+        ui.remove_ui("#inserted_checkbox_ar")
+        ui.remove_ui("#inserted_checkbox_fi")
+        ui.remove_ui("#inserted_info_ar")
+        ui.remove_ui("#inserted_info_fi")
+        if get_file_size() != 0:
+            ui.insert_ui(
+                ui.div(
+                    {"id": "inserted_card"}, 
+                    ui.card( 
+                ui.card_header("Display options"),
+                ui.input_checkbox("checkbox_of", "Show original file", False),
+                id="card_start_do",
+                full_screen=True,)
+                ),
+                selector="#card_start_cf",
+                where="afterEnd",
+            )
+            if get_file_size() <= 7000:
+                ui.insert_ui(
+                    ui.div(
+                        {"id": "inserted_checkbox_fi", "style": "max-width: 240px; margin-left: 15px; "}, 
+                        ui.input_checkbox("checkbox_fi", "Show frequent itemsets", False)
+                    ),
+                    selector="#card_start_do",
+                    where="beforeEnd",
+                )
+                ui.insert_ui(
+                    ui.div(
+                        {"id": "inserted_checkbox_ar", "style": "max-width: 240px; margin-left: 15px; "}, 
+                        ui.input_checkbox("checkbox_ar", "Show association rules", False)
+                    ),
+                    selector="#card_start_do",
+                    where="beforeEnd",
+                )
+                
+            elif get_file_size() <= 47000 and get_file_size() > 7000:
+                ui.remove_ui("#inserted_checkbox_ar")
+                ui.insert_ui(
+                    ui.div(
+                        {"id": "inserted_checkbox_fi", "style": "max-width: 240px; margin-left: 15px; "}, 
+                        ui.input_checkbox("checkbox_fi", "Show frequent itemsets", False)
+                    ),
+                    selector="#card_start_do",
+                    where="beforeEnd",
+                )
+                ui.insert_ui(
+                        ui.div(
+                            {"id": "inserted_info_ar", "style": "max-width: 240px; margin-left: 15px; color: rgb(171, 38, 38);"}, 
+                            ui.output_text("show_info_ar"),
+                        ),
+                        selector="#card_start_do",
+                        where="beforeEnd",
+                    )
+                  
+    @reactive.effect
+    @reactive.event(input.checkbox_initial_info)
+    def _():
+        if input.checkbox_initial_info():
+            ui.insert_ui(
+                ui.div(
+                    {"id": "inserted_card_initinfo"}, 
+                    ui.card( 
+                    ui.card_header("Let's get started! Check how you can use this program"),
+                    ui.div(
+                            {"style": "max-width: 240px;"}, 
+                            ui.download_button("downloadData", "Download foodmart.csv", class_="btn-primary")
+                        ),
+                    id="card_initial_info",
+                    full_screen=True,
+                    )
+                ),
+                selector="#main_view",
+                where="afterBegin",
             )
         else:
-            ui.remove_ui("#inserted_df_ar")           
-        
-
-    
+            ui.remove_ui("#inserted_card_initinfo")                      
+                           
+                  
+                  
 app = App(app_ui, server)
