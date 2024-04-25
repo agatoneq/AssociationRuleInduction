@@ -78,7 +78,7 @@ def sidebar_text():
 app_ui = ui.page_sidebar(
     ui.sidebar(sidebar_text(), width=320),  
     theme.darkly(),
-    title="Association Rule Induction",
+    title="Association Rules Induction",
     id = "main_view",
 )
 
@@ -354,13 +354,58 @@ def server(input: Inputs, output: Outputs, session: Session):
                 ui.div(
                     {"id": "inserted_card_initinfo"}, 
                     ui.card( 
-                    ui.card_header("Let's get started! Check how you can use this program"),
+                    ui.card_header(ui.h3("Introduction to frequent itemsets and association rules")),
+                    "Imagine you're the owner of a grocery store and you want to know which products are often bought together by your customers. This is possible through the analysis of frequent itemsets and association rules.",
+                    ui.br(),
+                    
+                    ui.h5({"class": "fw-bold"}, "Frequent itemsets: "),
+                    "These are groups of items that frequently appear together in the data.",
+                    ui.br(), 
+                    "Example: Cheese and ham - customers often buy them together.",
+                    ui.br(), ui.br(),
+                    
+                    ui.h5({"class": "fw-bold"}, "Association rules: "),
+                    "These describe relationships between items in the data.",
+                    ui.br(),
+                    "Example: If a customer buys bread, they probably also buy butter.", ui.br(),
+                    "The measure of how often such a rule occurs is called support. There are many other measures that help in the analysis.",
+                    ui.br(), ui.br(),
+                    
+                    ui.h5("Applications: "),
+                    "Association rule induction is used in marketing to create cross-selling strategies and in basket analysis in online stores. It helps better tailor offers to customer preferences, potentially increasing sales.",
+                    ui.br(),
+                    "What other industries do you think could benefit from association rule induction?",
+                    
+                    id="card_initial_info_topic",
+                   ),
+                    
+                    ui.card( 
+                    ui.card_header(ui.h3("Introduction to the program")),
+                    "By using a sample file, you can analyze and understand this technique yourself. You can download it here: ",
                     ui.div(
                             {"style": "max-width: 240px;"}, 
                             ui.download_button("downloadData", "Download foodmart.csv", class_="btn-primary")
-                        ),
-                    id="card_initial_info",
-                    full_screen=True,
+                        ), ui.br(),
+                    
+                    ui.h5({"class": "fw-bold"}, "You can also test your own data. Here are some tips: "),
+                    ui.div(
+                        ui.h6({"class": "fw-bold", "style": "display: inline;"}, "File size: "),
+                        "Make sure your file isn't too large. Above 7KB, it may hinder the analysis of association rules, and above 47KB, frequent itemsets may also be affected. The closer to these limits, the slower the functions may work."
+                    ),
+                    ui.div(
+                        ui.h6({"class": "fw-bold", "style": "display: inline;"}, "Transaction ID column: "),
+                        "If your file contains transaction identifiers, make sure they are placed as the first column and labeled \"ID\". If you don't have an ID column, you don't need to make any changes."
+                    ),
+                    ui.div(
+                        ui.h6({"class": "fw-bold", "style": "display: inline;"}, "File format: "),
+                        "Check if your file is in .csv format and if it follows the structure of the sample file."
+                    ),
+                    
+                    ui.br(),
+                    ui.h5({"class": "fw-bold"}, "Other notes: "),
+                    "You can only display one table at a time. If you want to change the view, you need to deselect the currently selected option and select another one. If you don't deselect the previous option, you'll need to select the desired option twice.",
+                    
+                    id="card_initial_info_program",
                     )
                 ),
                 selector="#main_view",
@@ -369,6 +414,5 @@ def server(input: Inputs, output: Outputs, session: Session):
         else:
             ui.remove_ui("#inserted_card_initinfo")                      
                            
-          
                   
 app = App(app_ui, server)
