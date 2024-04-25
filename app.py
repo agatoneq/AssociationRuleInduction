@@ -7,21 +7,6 @@ from mlxtend.preprocessing import TransactionEncoder
 from mlxtend.frequent_patterns import apriori, association_rules    
     
 #UI functions
-def custom_value_transform(value):
-    if value <= 1:
-        return value * 0.2
-    else:
-        return (value - 1) * 2 + 0.2
-
-slider_value=0
-number_of_itemsets = 0
-selected_i = 0
-selected_e = 0
-
-number_of_rules = 0
-selected_r = 0
-# file_name: str = "xyz"
-    
 def make_panels():
     return [
         ui.accordion_panel(
@@ -42,50 +27,27 @@ def make_panels():
                 
         ui.accordion_panel(
             f"Frequent Itemsets",
-            # ui.card(
-            #     ui.card_header("Info"),
-            #     ui.p(
-            #         f"Number of itemstes: {number_of_itemsets}", ui.br(),
-            #         f"Selected itemstes: {selected_i}", ui.br(), 
-            #         f"Selected examples: {selected_e}", ui.br(),
-            #     ),
-            #     #ui.input_action_button("expand_all_button1_fi", "Expand all"),  
-            #     #ui.input_action_button("collapse_all_button1_fi", "Collapse all"),
-            #     full_screen=True,
-            # ),
-                        
-            # ui.card(
-            #     ui.card_header("Find itemsets"),
-            #     ui.p(ui.input_slider("minsupp_slider_fi", "Minimal support:", 0.1, 100, 2, step=1, post="%")),
-            #     ui.p(ui.input_slider("max_itemsets_slider_fi", "Max. number of itemsets:", 10, 100000, 10000)),
-            #     full_screen=True,
-            # ),
+            ui.card(
+                ui.card_header("Find itemsets"),
+                ui.input_slider("minsupp_slider_fi", "Minimal support:", 0.01, 100, 2, step=1, post="%"),
+                full_screen=True,
+            ),
             
             ui.card(   
                 ui.card_header("Filter itemsets"),
-                ui.input_slider("minsupp_slider_fi", "Minimal support:", 0.1, 100, 2, step=1, post="%"),
                 ui.input_text("containing_text_fi", "Contains: "),
                 ui.input_numeric("min_values_per_itemset", "Min. number of items:", 1, min=1, max=100),
-                ui.input_numeric("max_values_per_itemset", "Max. number of items:", 1, min=1, max=100),
+                ui.input_numeric("max_values_per_itemset", "Max. number of items:", 5, min=1, max=100),
                 full_screen=True,
             ),
         ),
         
         ui.accordion_panel(
             f"Association Rules",
-            # ui.card(
-            #     ui.card_header("Info"),
-            #     ui.p(
-            #         f"Number of rules: {number_of_rules}", ui.br(),
-            #         f"Selected rules: {selected_r}", ui.br()),
-            #     full_screen=True,
-            # ),
-                        
             ui.card(
                 ui.card_header("Find association rules"),
                 ui.p(ui.input_slider("minsupp_slider_ar", "Minimal support:", 0.1, 100, 2, step=5, post="%")),
                 ui.p(ui.input_slider("minconf_slider_ar", "Minimal confidence:", 0.1, 100, 2, step=1, post="%")),
-                #ui.p(ui.input_slider("max_rules_slider_ar", "Max. number of rules:", 10, 100000, 10000)),
                 full_screen=True,
             ),
             
@@ -93,7 +55,7 @@ def make_panels():
                 ui.card_header("Filter by Antecedent"),
                 ui.input_text("containing_text_ant_ar", "Contains: "),
                 ui.input_numeric("min_items_number_ar_ant", "Min. number of items:", 1, min=1, max=100),
-                ui.input_numeric("max_items_number_ar_ant", "Max. number of items:", 1, min=1),
+                ui.input_numeric("max_items_number_ar_ant", "Max. number of items:", 5, min=1),
                 full_screen=True,
             ),
             
@@ -101,11 +63,9 @@ def make_panels():
                 ui.card_header("Filter by Consequent"),
                 ui.input_text("containing_text_con_ar", "Contains: "),
                 ui.input_numeric("min_items_number_ar_con", "Min. number of items:", 1, min=1, max=100),
-                ui.input_numeric("max_items_number_ar_con", "Max. number of items:", 1, min=1),
+                ui.input_numeric("max_items_number_ar_con", "Max. number of items:", 5, min=1),
                 full_screen=True,
             ),
-            
-            ui.input_task_button("confirm_button_ar", "Confirm"), 
         )
     ]
     
@@ -113,19 +73,14 @@ def sidebar_text():
     return (
         ui.accordion(*make_panels(), id="acc_frequent_itemsets", multiple=True),
     )
- 
-#  sf = False
     
 #UI    
 app_ui = ui.page_sidebar(
     ui.sidebar(sidebar_text(), width=320),  
     theme.darkly(),
-    #ui.output_text("show_fr_itemsets2"),
-    ui.output_text("find_frequent_itemsets"),
     title="Association Rule Induction",
     id = "main_view",
 )
-
 
 #SERVER
 def server(input: Inputs, output: Outputs, session: Session):
@@ -232,7 +187,6 @@ def server(input: Inputs, output: Outputs, session: Session):
         df = pd.DataFrame(te_ary, columns=te.columns_)
         return apriori(df, min_support=change_supp_fi(), use_colnames=True)
         
-
     @render.data_frame
     def show_fr_itemsets():
         keyword = input.containing_text_fi().lower()
@@ -245,7 +199,6 @@ def server(input: Inputs, output: Outputs, session: Session):
             fr_itemsets_filtered = fr_itemsets[fr_itemsets.apply(lambda row: min_values_per_itemset <= len(row['itemsets']) <= max_values_per_itemset, axis=1)]
             return fr_itemsets_filtered[fr_itemsets_filtered.astype(str).apply(lambda row: keyword in ''.join(row['itemsets']).lower(), axis=1)]
 
-    
     @reactive.effect
     @reactive.event(input.checkbox_fi)
     def _():
@@ -269,7 +222,6 @@ def server(input: Inputs, output: Outputs, session: Session):
             ui.update_checkbox("checkbox_of", value=False)
             ui.update_checkbox("checkbox_ar", value=False)
    
-   
     @reactive.event(input.minsupp_slider_ar)
     def change_supp_ar():
         min_supp_fi = input.minsupp_slider_ar._value/100
@@ -280,9 +232,7 @@ def server(input: Inputs, output: Outputs, session: Session):
         min_supp_fi = input.minconf_slider_ar._value/100
         return min_supp_fi  
     
-        
     @render.data_frame
-    #@reactive.event(input.containing_text_ant_ar)
     def show_assoc_rules():
         keyword_ant = input.containing_text_ant_ar().lower()
         keyword_con = input.containing_text_con_ar().lower()
@@ -298,23 +248,14 @@ def server(input: Inputs, output: Outputs, session: Session):
         else:
             assoc_rules = association_rules(freq_itemsets, metric="confidence", min_threshold=min_conf_ar)
             assoc_rules_filtered = assoc_rules[assoc_rules['support'] >= min_supp_ar]
-            # Filtrowanie po minimalnej i maksymalnej liczbie wartości w poprzednikach
             assoc_rules_filtered_ant = assoc_rules_filtered[assoc_rules_filtered['antecedents'].apply(lambda x: min_values_per_itemset_ant_ar <= len(x) <= max_values_per_itemset_ant_ar)]
-            # Filtrowanie po minimalnej i maksymalnej liczbie wartości w następnikach
             assoc_rules_filtered_con = assoc_rules_filtered_ant[assoc_rules_filtered_ant['consequents'].apply(lambda x: min_values_per_itemset_con_ar <= len(x) <= max_values_per_itemset_con_ar)]
-            # Filtrowanie po pełnych słowach kluczowych w poprzednikach i następnikach
             assoc_rules_filtered_keywords = assoc_rules_filtered_con[
                 assoc_rules_filtered_con.astype(str).apply(lambda row: keyword_ant in ''.join(row['antecedents']).lower(), axis=1)]
             assoc_rules_filtered_keywords = assoc_rules_filtered_keywords[
                 assoc_rules_filtered_keywords.astype(str).apply(lambda row: keyword_con in ''.join(row['consequents']).lower(), axis=1)]
-            
-           # ['consequents'].astype(str).apply(lambda x: keyword_con.lower() in ' '.join(x).lower())]
             return pd.DataFrame(assoc_rules_filtered_keywords)
-           
-        #    fr_itemsets_filtered = fr_itemsets[fr_itemsets.apply(lambda row: min_values_per_itemset <= len(row['itemsets']) <= max_values_per_itemset, axis=1)]
-        #     return fr_itemsets_filtered[fr_itemsets_filtered.astype(str).apply(lambda row: keyword in ' '.join(row['itemsets']).lower(), axis=1)]
-    
-            
+
     @reactive.effect
     @reactive.event(input.checkbox_ar)
     def _():
