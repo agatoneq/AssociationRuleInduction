@@ -76,8 +76,7 @@ def sidebar_text():
     
 #UI    
 app_ui = ui.page_sidebar(
-    ui.sidebar(sidebar_text(), width=320),  
-    theme.darkly(),
+    ui.sidebar(sidebar_text(), width=320), 
     title="Association Rules Induction",
     id = "main_view",
 )
